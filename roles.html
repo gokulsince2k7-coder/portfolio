@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gokul Nath S — Choose Your Path</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── PAGE LAYOUT ── */
+    .hall-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: calc(var(--nav-h) + 3rem) 2rem 3rem;
+      background: #ffffff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Subtle decorative background lines (like ruled paper — very faint) */
+    .hall-page::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(0,0,0,0.025) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0,0,0,0.025) 1px, transparent 1px);
+      background-size: 80px 80px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Soft radial highlight in center */
+    .hall-page::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(255,255,255,1) 30%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── HEADING ── */
+    .hall-heading {
+      position: relative; z-index: 2;
+      text-align: center;
+      margin-bottom: 4rem;
+      animation: fadeSlideUp 0.6s cubic-bezier(0.4,0,0.2,1) both;
+    }
+    .hall-eyebrow {
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--grey-3);
+      margin-bottom: 0.65rem;
+    }
+    .hall-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700; letter-spacing: -0.025em;
+      color: var(--black); line-height: 1.15;
+    }
+    .hall-title em {
+      font-style: normal;
+      color: var(--accent);
+    }
+    .hall-subtitle {
+      margin-top: 0.75rem;
+      font-size: 0.95rem; font-weight: 300;
+      color: var(--grey-2); line-height: 1.6;
+    }
+
+    /* ── DOORS STAGE ── */
+    .doors-stage {
+      display: flex;
+      gap: 4rem;
+      align-items: flex-end;
+      justify-content: center;
+      perspective: 1200px;
+      perspective-origin: 50% 85%;
+      position: relative; z-index: 2;
+      animation: fadeSlideUp 0.6s 0.12s cubic-bezier(0.4,0,0.2,1) both;
+    }
+
+    /* ── DOOR UNIT ── */
+    .door-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    /* Door Frame / architrave */
+    .door-frame {
+      position: relative;
+      padding: 10px 10px 0;
+      border-radius: 90px 90px 0 0;
+      border: 1.5px solid var(--grey-4);
+      border-bottom: none;
+      background: var(--grey-5);
+      transition: border-color 0.3s;
+    }
+    .door-frame::before {
+      content: '';
+      position: absolute;
+      top: -1.5px; left: 24px; right: 24px; height: 1.5px;
+      background: linear-gradient(to right, transparent, var(--grey-3), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .door-unit--left:hover  .door-frame { border-color: var(--accent); }
+    .door-unit--right:hover .door-frame { border-color: #7c3aed; }
+    .door-unit--left:hover  .door-frame::before { opacity: 1; }
+    .door-unit--right:hover .door-frame::before { opacity: 1; }
+
+    /* ── 3D DOOR BODY ── */
+    .door-3d {
+      width: 185px;
+      height: 345px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+                  filter 0.4s ease;
+      border-radius: 80px 80px 0 0;
+    }
+
+    /* Left door: hinged on left, slightly open (shows right edge) */
+    .door-unit--left .door-3d {
+      transform: rotateY(-22deg);
+      transform-origin: left center;
+    }
+    .door-unit--left:hover .door-3d {
+      transform: rotateY(-5deg);
+      filter: drop-shadow(0 20px 40px rgba(0,113,227,0.18));
+    }
+    .door-unit--left.opening .door-3d {
+      transform: rotateY(-88deg) !important;
+      transition-duration: 0.85s;
+    }
+
+    /* Right door: hinged on right */
+    .door-unit--right .door-3d {
+      transform: rotateY(22deg);
+      transform-origin: right center;
+    }
+    .door-unit--right:hover .door-3d {
+      transform: rotateY(5deg);
+      filter: drop-shadow(0 20px 40px rgba(124,58,237,0.18));
+    }
+    .door-unit--right.opening .door-3d {
+      transform: rotateY(88deg) !important;
+      transition-duration: 0.85s;
+    }
+
+    /* Door front face */
+    .door-face {
+      position: absolute; inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(165deg, #ffffff 0%, #f8f8fa 55%, #f2f2f5 100%);
+      border: 1.5px solid var(--grey-4);
+      border-bottom: none;
+      backface-visibility: hidden;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    /* Subtle sheen */
+    .door-face::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(140deg, rgba(255,255,255,0.9) 0%, transparent 55%);
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    /* Door upper recessed panel */
+    .door-panel-top {
+      position: absolute;
+      top: 20px; left: 16px; right: 16px;
+      height: 95px;
+      border: 1px solid var(--grey-4);
+      border-radius: 56px 56px 4px 4px;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.04);
+      transition: border-color 0.3s;
+    }
+    /* Door lower recessed panel */
+    .door-panel-bottom {
+      position: absolute;
+      bottom: 50px; left: 16px; right: 16px;
+      height: 64px;
+      border: 1px solid var(--grey-4);
+      border-radius: 4px;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.04);
+      transition: border-color 0.3s;
+    }
+
+    /* Door knob */
+    .door-knob {
+      position: absolute;
+      bottom: 72px;
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #d0d0d8, #909098);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.06);
+      transition: background 0.3s;
+    }
+    .door-unit--left  .door-knob { right: 20px; }
+    .door-unit--right .door-knob { left: 20px; }
+
+    /* Door content (icon + text) */
+    .door-content {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 0 1.25rem;
+      margin-top: 24px;
+    }
+    .door-icon {
+      font-size: 2.4rem;
+      display: block;
+      margin-bottom: 0.85rem;
+      transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+    .door-unit:hover .door-icon { transform: scale(1.1) translateY(-3px); }
+
+    .door-role {
+      font-size: 0.92rem; font-weight: 700;
+      color: var(--black); letter-spacing: -0.01em;
+      line-height: 1.3;
+      margin-bottom: 0.4rem;
+    }
+    .door-count {
+      font-size: 0.68rem; font-weight: 400;
+      color: var(--grey-3);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* Door right edge — 3D thickness */
+    .door-edge {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      width: 20px;
+      border-radius: inherit;
+      background: linear-gradient(to right, #e8e8ed, #dddde2);
+      border-left: 1px solid rgba(0,0,0,0.04);
+    }
+    .door-unit--left .door-edge {
+      right: 0;
+      transform-origin: 0% 50%;
+      transform: translateX(100%) rotateY(90deg);
+    }
+    .door-unit--right .door-edge {
+      left: 0;
+      transform-origin: 100% 50%;
+      transform: translateX(-100%) rotateY(-90deg);
+    }
+
+    /* Hover state — face glow */
+    .door-unit--left:hover .door-face {
+      border-color: rgba(0,113,227,0.4);
+      box-shadow: 0 0 0 3px rgba(0,113,227,0.08),
+                  0 8px 32px rgba(0,113,227,0.1);
+    }
+    .door-unit--left:hover .door-panel-top,
+    .door-unit--left:hover .door-panel-bottom {
+      border-color: rgba(0,113,227,0.2);
+    }
+    .door-unit--left:hover .door-knob {
+      background: radial-gradient(circle at 35% 35%, #90bff5, #0071e3);
+    }
+
+    .door-unit--right:hover .door-face {
+      border-color: rgba(124,58,237,0.4);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.08),
+                  0 8px 32px rgba(124,58,237,0.1);
+    }
+    .door-unit--right:hover .door-panel-top,
+    .door-unit--right:hover .door-panel-bottom {
+      border-color: rgba(124,58,237,0.2);
+    }
+    .door-unit--right:hover .door-knob {
+      background: radial-gradient(circle at 35% 35%, #c4b0f5, #7c3aed);
+    }
+
+    /* Door step/threshold at bottom */
+    .door-threshold {
+      width: 205px; height: 8px;
+      border-radius: 2px 2px 0 0;
+      background: linear-gradient(to bottom, #e8e8ed, #dddde2);
+      border: 1.5px solid var(--grey-4);
+      border-bottom: none;
+      margin-top: -1px;
+      transition: border-color 0.3s;
+    }
+    .door-unit--left:hover  .door-threshold { border-color: rgba(0,113,227,0.35); }
+    .door-unit--right:hover .door-threshold { border-color: rgba(124,58,237,0.35); }
+
+    /* Floor / ground line */
+    .door-ground {
+      width: 205px; height: 1px;
+      background: var(--grey-4);
+    }
+
+    /* Label below door */
+    .door-label-below {
+      margin-top: 1.25rem;
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--grey-3);
+      display: flex; align-items: center; gap: 0.4rem;
+      transition: color 0.3s;
+    }
+    .door-unit--left:hover  .door-label-below { color: var(--accent); }
+    .door-unit--right:hover .door-label-below { color: #7c3aed; }
+    .door-arrow { font-size: 0.85rem; transition: transform 0.3s; }
+    .door-unit:hover .door-arrow { transform: translateX(3px); }
+
+    /* ── PERSPECTIVE FLOOR GRID ── */
+    .hall-floor {
+      position: fixed;
+      bottom: 0; left: -10%; right: -10%;
+      height: 220px;
+      perspective: 300px;
+      perspective-origin: 50% 0%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .floor-inner {
+      width: 100%; height: 100%;
+      transform: rotateX(50deg);
+      transform-origin: top center;
+      background-image:
+        linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px);
+      background-size: 80px 60px;
+    }
+
+    /* ── FLASH OVERLAY ── */
+    .flash-overlay {
+      position: fixed; inset: 0;
+      background: #fff;
+      opacity: 0; pointer-events: none;
+      z-index: 9999;
+      transition: opacity 0.35s ease;
+    }
+    .flash-overlay.active { opacity: 1; pointer-events: all; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .doors-stage { gap: 2rem; }
+      .door-3d { width: 145px; height: 275px; }
+      .door-threshold, .door-ground { width: 165px; }
+      .door-panel-top { height: 70px; }
+      .door-panel-bottom { height: 50px; bottom: 40px; }
+      .door-knob { bottom: 58px; }
+      .hall-title { font-size: 1.6rem; }
+      .hall-heading { margin-bottom: 2.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV (same as rest of portfolio) -->
+  <header class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">Gokul Nath S</a>
+      <nav class="nav-links" id="navLinks">
+        <a href="index.html" class="nl">About</a>
+        <a href="mailto:gokulsince2k7@gmail.com" class="nl nl-cta">Hire Me</a>
+      </nav>
+      <button class="burger" id="burger" aria-label="Menu">
+        <span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Flash transition overlay -->
+  <div class="flash-overlay" id="flashOverlay"></div>
+
+  <!-- MAIN PAGE -->
+  <main class="hall-page">
+
+    <!-- Heading -->
+    <div class="hall-heading">
+      <p class="hall-eyebrow">Portfolio · Choose your path</p>
+      <h1 class="hall-title">Which door will you<br><em>open today?</em></h1>
+      <p class="hall-subtitle">Select a role to explore the projects behind it.</p>
+    </div>
+
+    <!-- Doors -->
+    <div class="doors-stage">
+
+      <!-- Door 1: Web Development -->
+      <div class="door-unit door-unit--left" id="doorWebDev" onclick="openDoor('doorWebDev','webdev.html')">
+        <div class="door-frame">
+          <div class="door-3d">
+            <div class="door-face">
+              <div class="door-panel-top"></div>
+              <div class="door-content">
+                <span class="door-icon">🌐</span>
+                <p class="door-role">Web<br>Development</p>
+                <p class="door-count">4 Projects</p>
+              </div>
+              <div class="door-panel-bottom"></div>
+              <div class="door-knob"></div>
+            </div>
+            <div class="door-edge"></div>
+          </div>
+        </div>
+        <div class="door-threshold"></div>
+        <div class="door-ground"></div>
+        <p class="door-label-below">Open <span class="door-arrow">→</span></p>
+      </div>
+
+      <!-- Door 2: Cyber Security -->
+      <div class="door-unit door-unit--right" id="doorCyberSec" onclick="openDoor('doorCyberSec','cybersec.html')">
+        <div class="door-frame">
+          <div class="door-3d">
+            <div class="door-face">
+              <div class="door-panel-top"></div>
+              <div class="door-content">
+                <span class="door-icon">🛡️</span>
+                <p class="door-role">Cyber<br>Security</p>
+                <p class="door-count">1 Project</p>
+              </div>
+              <div class="door-panel-bottom"></div>
+              <div class="door-knob"></div>
+            </div>
+            <div class="door-edge"></div>
+          </div>
+        </div>
+        <div class="door-threshold"></div>
+        <div class="door-ground"></div>
+        <p class="door-label-below">Open <span class="door-arrow">→</span></p>
+      </div>
+
+    </div><!-- /doors-stage -->
+
+  </main>
+
+  <!-- Perspective floor grid -->
+  <div class="hall-floor"><div class="floor-inner"></div></div>
+
+  <script src="script.js"></script>
+  <script>
+    function openDoor(doorId, destination) {
+      const unit  = document.getElementById(doorId);
+      const flash = document.getElementById('flashOverlay');
+      unit.classList.add('opening');
+      setTimeout(() => {
+        flash.classList.add('active');
+        setTimeout(() => { window.location.href = destination; }, 350);
+      }, 650);
+    }
+  </script>
+
+</body>
+</html>
